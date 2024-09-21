@@ -5,16 +5,21 @@ import { Button } from "./components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card"
 import { Wifi, Bluetooth, AlertCircle } from "lucide-react"
 
-export function UserDashboard() {
-  const [isScanning, setIsScanning] = useState(false)
-  const [airdrops, setAirdrops] = useState([])
-  const [wifiEnabled, setWifiEnabled] = useState(false)
-  const [bluetoothEnabled, setBluetoothEnabled] = useState(false)
+export function UserDashboard({ bluetoothEnabled }: { bluetoothEnabled: boolean }) {
+  const [isScanning, setIsScanning] = useState<boolean>(false)
+  const [airdrops, setAirdrops] = useState<Array<{ id: number, name: string }>>([])
+  const [wifiEnabled, setWifiEnabled] = useState<boolean>(false)
 
   useEffect(() => {
-    // Mock checking for WiFi and Bluetooth
-    setWifiEnabled(Math.random() > 0.5)
-    setBluetoothEnabled(Math.random() > 0.5)
+    // Check for WiFi connectivity
+    setWifiEnabled(navigator.onLine)
+    window.addEventListener('online', () => setWifiEnabled(true))
+    window.addEventListener('offline', () => setWifiEnabled(false))
+
+    return () => {
+      window.removeEventListener('online', () => setWifiEnabled(true))
+      window.removeEventListener('offline', () => setWifiEnabled(false))
+    }
   }, [])
 
   const startReceiving = () => {
@@ -34,7 +39,7 @@ export function UserDashboard() {
     }, 3000)
   }
 
-  const receiveAirdrop = (id) => {
+  const receiveAirdrop = (id: number) => {
     // Mock receiving airdrop
     setAirdrops(airdrops.filter((airdrop) => airdrop.id !== id))
     alert(`Airdrop ${id} received!`)

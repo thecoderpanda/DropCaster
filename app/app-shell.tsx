@@ -1,22 +1,44 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "./components/ui/button"
 import { Input } from "./components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs"
 import { UserDashboard } from "./user-dashboard"
 import { ProtocolDashboard } from "./protocol-dashboard"
 import { Settings } from "./settings"
-import { Wallet, Settings as SettingsIcon, User } from "lucide-react"
+import { Wallet, Settings as SettingsIcon, User, Bluetooth } from "lucide-react"
 
 export default function Component() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [activeTab, setActiveTab] = useState("user")
   const [showSettings, setShowSettings] = useState(false)
+  const [bluetoothEnabled, setBluetoothEnabled] = useState(false)
 
   const handleLogin = (type: "wallet" | "email") => {
-    // Mock login functionality
-    setIsLoggedIn(true)
+    if (type === "wallet") {
+      // Implement wallet connection logic here
+      console.log("Connecting wallet...")
+      // For demonstration, we'll just set isLoggedIn to true
+      setIsLoggedIn(true)
+    } else {
+      // Implement email login logic here
+      console.log("Logging in with email...")
+      setIsLoggedIn(true)
+    }
+  }
+
+  const toggleBluetooth = async () => {
+    if (!bluetoothEnabled) {
+      try {
+        await (navigator as any).bluetooth.requestDevice({ acceptAllDevices: true })
+        setBluetoothEnabled(true)
+      } catch (error) {
+        console.error("Bluetooth error:", error)
+      }
+    } else {
+      setBluetoothEnabled(false)
+    }
   }
 
   if (!isLoggedIn) {
@@ -45,9 +67,6 @@ export default function Component() {
           >
             Login with Email
           </Button>
-          <p className="text-sm text-center text-gray-300">
-            Don't have a wallet? Login with email and we'll generate one for you!
-          </p>
         </div>
       </div>
     )
@@ -59,6 +78,9 @@ export default function Component() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Airdrop Streamer</h1>
           <div className="flex space-x-2">
+            <Button variant="ghost" size="icon" onClick={toggleBluetooth}>
+              <Bluetooth className={`h-5 w-5 ${bluetoothEnabled ? 'text-blue-500' : 'text-gray-500'}`} />
+            </Button>
             <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
               <SettingsIcon className="h-5 w-5" />
             </Button>
@@ -75,7 +97,7 @@ export default function Component() {
             <TabsTrigger value="protocol">Protocol</TabsTrigger>
           </TabsList>
           <TabsContent value="user">
-            <UserDashboard />
+            <UserDashboard bluetoothEnabled={false} />
           </TabsContent>
           <TabsContent value="protocol">
             <ProtocolDashboard />
