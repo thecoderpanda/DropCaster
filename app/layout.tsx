@@ -1,11 +1,12 @@
+// app/layout.tsx
 import './globals.css'
-import { Inter } from 'next/font/google'
+import { Space_Grotesk } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'Airdrop Streamer',
-  description: 'Receive and broadcast airdrops in events and workshops',
+  description: 'Stream airdrops locally',
 }
 
 export default function RootLayout({
@@ -15,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={`${spaceGrotesk.className} bg-black text-white`}>{children}</body>
     </html>
   )
 }
