@@ -2,23 +2,41 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import {
-    DynamicContextProvider,
-    DynamicWidget,
-  } from "@dynamic-labs/sdk-react-core";
-  
-  import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
+  DynamicContextProvider,
+  DynamicWidget,
+} from "@dynamic-labs/sdk-react-core";
+import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
+import { localNetworkService } from '../lib/LocalNetworkService'
 
 function WalletLoginContent() {
   const router = useRouter()
-  const isAuthenticated  = false;
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [walletAddress, setWalletAddress] = useState('')
 
-  if (isAuthenticated) {
-    router.push('/dashboard')
-    return null
-  }
+  useEffect(() => {
+    localNetworkService.initializePeerConnection();
+  }, []);
 
-  return <DynamicWidget />
+  useEffect(() => {
+    if (isAuthenticated && walletAddress) {
+      localNetworkService.broadcastWalletAddress(walletAddress);
+      router.push('/dashboard')
+    }
+  }, [isAuthenticated, walletAddress, router]);
+
+  const handleAuthSuccess = (authData: any) => {
+    setIsAuthenticated(true);
+    setWalletAddress(authData.wallet?.address || '');
+  };
+
+  return (
+    <DynamicWidget
+      buttonClassName="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+      onAuthSuccess={handleAuthSuccess}
+    />
+  )
 }
 
 export default function WalletLogin() {
@@ -32,8 +50,4 @@ export default function WalletLogin() {
       <WalletLoginContent />
     </DynamicContextProvider>
   )
-}
-
-function useDynamicContext(): { isAuthenticated: any; } {
-    throw new Error('Function not implemented.');
 }

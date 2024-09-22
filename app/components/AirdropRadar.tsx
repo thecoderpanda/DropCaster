@@ -1,19 +1,29 @@
 // components/AirdropRadar.tsx
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { localNetworkService } from '../lib/LocalNetworkService'
 
-export default function AirdropRadar({ onAirdropFound }: { onAirdropFound: () => void }) {
+export default function AirdropRadar({ onAirdropFound }: { onAirdropFound: (airdrop: any) => void }) {
   const [searching, setSearching] = useState(false)
 
   useEffect(() => {
-    if (searching) {
-      const timer = setTimeout(() => {
-        onAirdropFound()
-        setSearching(false)
-      }, 3000)
-      return () => clearTimeout(timer)
-    }
-  }, [searching, onAirdropFound])
+    const handleMessage = (message: any) => {
+      if (message.type === 'airdrop') {
+        onAirdropFound(message.data);
+      }
+    };
+
+    localNetworkService.on('message', handleMessage);
+
+    return () => {
+      localNetworkService.off('message', handleMessage);
+    };
+  }, [onAirdropFound]);
+
+  const startSearching = () => {
+    setSearching(true);
+    localNetworkService.startSearching();
+  };
 
   return (
     <div className="relative w-64 h-64 mx-auto">
@@ -29,9 +39,9 @@ export default function AirdropRadar({ onAirdropFound }: { onAirdropFound: () =>
       />
       <button
         className="absolute inset-0 flex items-center justify-center text-white bg-purple-600 rounded-full hover:bg-purple-700 transition-colors"
-        onClick={() => setSearching(true)}
+        onClick={startSearching}
       >
-        {searching ? 'Searching...' : 'Start Search'}
+        {searching ? 'Fetching Airdrops...' : 'Start Search'}
       </button>
     </div>
   )
